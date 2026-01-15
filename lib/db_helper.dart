@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'note_model.dart';
+import 'contact_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -18,7 +19,12 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _createDB,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future _createDB(Database db, int version) async {
@@ -32,6 +38,30 @@ CREATE TABLE notes (
   content $textType
   )
 ''');
+
+    await db.execute('''
+CREATE TABLE contacts (
+  id $idType,
+  name $textType,
+  phone $textType,
+  email $textType
+)
+''');
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+      const textType = 'TEXT NOT NULL';
+      await db.execute('''
+CREATE TABLE contacts (
+  id $idType,
+  name $textType,
+  phone $textType,
+  email $textType
+)
+''');
+    }
   }
 
   // 1. Tambah Catatan (Create)
@@ -61,10 +91,34 @@ CREATE TABLE notes (
   // 4. Hapus Catatan (Delete)
   Future<int> delete(int id) async {
     final db = await instance.database;
-    return await db.delete(
-      'notes',
+    return await db.delete('notes', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // Contact CRUD
+
+  Future<int> createContact(Contact contact) async {
+    final db = await instance.database;
+    return await db.insert('contacts', contact.toMap());
+  }
+
+  Future<List<Contact>> readAllContacts() async {
+    final db = await instance.database;
+    final result = await db.query('contacts');
+    return result.map((json) => Contact.fromMap(json)).toList();
+  }
+
+  Future<int> updateContact(Contact contact) async {
+    final db = await instance.database;
+    return db.update(
+      'contacts',
+      contact.toMap(),
       where: 'id = ?',
-      whereArgs: [id],
+      whereArgs: [contact.id],
     );
+  }
+
+  Future<int> deleteContact(int id) async {
+    final db = await instance.database;
+    return await db.delete('contacts', where: 'id = ?', whereArgs: [id]);
   }
 }
