@@ -5,6 +5,7 @@ import 'db_helper.dart';
 import 'note_model.dart';
 import 'note_detail_page.dart';
 import 'contact_list_page.dart';
+import 'product_list_page.dart';
 
 void main() {
   if (Platform.isWindows || Platform.isLinux) {
@@ -48,6 +49,17 @@ class _NotesPageState extends State<NotesPage> {
       appBar: AppBar(
         title: const Text('FayNote'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_bag),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProductListPage(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.contacts),
             onPressed: () {
