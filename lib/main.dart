@@ -6,6 +6,7 @@ import 'note_model.dart';
 import 'note_detail_page.dart';
 import 'contact_list_page.dart';
 import 'product_list_page.dart';
+import 'dashboard_page.dart';
 
 void main() {
   if (Platform.isWindows || Platform.isLinux) {
@@ -68,6 +69,15 @@ class _NotesPageState extends State<NotesPage> {
                 MaterialPageRoute(
                   builder: (context) => const ContactListPage(),
                 ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.dashboard),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DashboardPage()),
               );
             },
           ),
